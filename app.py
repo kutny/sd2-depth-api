@@ -5,7 +5,7 @@ from flask import Flask, request, Response, send_file
 import io
 import os
 from PIL import Image
-from diffusers import StableDiffusionDepth2ImgPipeline
+from diffusers import StableDiffusionDepth2ImgPipeline, EulerAncestralDiscreteScheduler
 import random
 import colorlog
 import sys
@@ -93,9 +93,15 @@ app = Flask(__name__)
 
 logger.info(f"Loading model {model_path}")
 
+scheduler = EulerAncestralDiscreteScheduler.from_config(
+    "stabilityai/stable-diffusion-2-depth",
+    subfolder="scheduler",
+)
+
 depth2img_pipe = StableDiffusionDepth2ImgPipeline.from_pretrained(
     model_path,
     torch_dtype=torch.float16,
+    scheduler=scheduler,
 ).to("cuda")
 
 def load_image(im_b64) -> Image:
