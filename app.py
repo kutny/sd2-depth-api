@@ -91,6 +91,8 @@ os.mkdir(base_images_dir)
 
 app = Flask(__name__)
 
+logger.info(f"Loading model {model_path}")
+
 depth2img_pipe = StableDiffusionDepth2ImgPipeline.from_pretrained(
     model_path,
     torch_dtype=torch.float16,
