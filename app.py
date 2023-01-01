@@ -94,6 +94,8 @@ def load_image(im_b64) -> Image:
 
     return Image.open(io.BytesIO(img_bytes))
 
+logger.info("sd2-depth-api started")
+
 @app.route('/', methods=['POST'])
 def generate_image():
     request_id = str(uuid.uuid4())
@@ -102,7 +104,7 @@ def generate_image():
     if params is None:
         params = dict()
 
-    logger.info("New request", extra={**{"request_id": request_id}, **params})
+    logger.info("New request", extra={**{"request_id": request_id}, **(params.pop("base_image"))})
 
     if "base_image" not in params:
         return Response("base_image must be provided", status=400)
