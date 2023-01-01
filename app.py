@@ -104,7 +104,10 @@ def generate_image():
     if params is None:
         params = dict()
 
-    logger.info("New request", extra={**{"request_id": request_id}, **(params.pop("base_image"))})
+    params_logging = params.copy()
+    del params_logging["base_image"]
+
+    logger.info("New request", extra={**{"request_id": request_id}, **params_logging})
 
     if "base_image" not in params:
         return Response("base_image must be provided", status=400)
