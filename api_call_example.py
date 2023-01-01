@@ -14,7 +14,7 @@ if "SD2_DEPTH_API_URL" not in os.environ:
 prompt = "glossy white kitchen, fridge, old-style chairs, painting on the wall, concrete trowel, modern table with modern white chairs, mate glass entrance door, teak floor, air-conditioning"
 negative_prompt = "lowres, bad_anatomy, error_body, error_hair, error_arm, error_hands, bad_hands, error_fingers, bad_fingers, missing_fingers, error_legs, bad_legs, multiple_legs, missing_legs, error_lighting, error_shadow, error_reflection, text, error, extra_digit, fewer_digits, cropped, worst_quality, low_quality, normal_quality, jpeg_artifacts, signature, watermark, username, blurry"
 steps = 20
-seed = 128
+seed = random.randint(10000, 99999)
 
 def prepare_image_data(path):
     with open(path, "rb") as f:
