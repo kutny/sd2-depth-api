@@ -8,6 +8,7 @@ from PIL import Image
 from diffusers import StableDiffusionDepth2ImgPipeline
 import random
 import colorlog
+import sys
 from logging import PercentStyle
 
 class ExtraFieldsFormatter(colorlog.ColoredFormatter):
@@ -78,6 +79,12 @@ def create_logger(name):
 
 logger = create_logger("sd2-depth-api")
 
+if len(sys.argv) != 2:
+    logger.error("Missing model path argument")
+    sys.exit(1)
+
+model_path = sys.argv[1]
+
 base_images_dir = f"{os.getcwd()}/input_images"
 
 os.mkdir(base_images_dir)
@@ -85,7 +92,7 @@ os.mkdir(base_images_dir)
 app = Flask(__name__)
 
 depth2img_pipe = StableDiffusionDepth2ImgPipeline.from_pretrained(
-    "stabilityai/stable-diffusion-2-depth",
+    model_path,
     torch_dtype=torch.float16,
 ).to("cuda")
 
