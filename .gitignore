@@ -6,5 +6,5 @@ build
 *egg-info
 dist/*
 .DS_Store
-res.png
+output/*
 !.gitkeep
