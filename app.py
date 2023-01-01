@@ -148,7 +148,8 @@ def generate_image():
         "steps": steps,
     })
 
-    torch.cuda.manual_seed_all(seed)
+    generator = torch.Generator(device='cuda')
+    generator.manual_seed(seed)
 
     with torch.autocast("cuda"), torch.inference_mode():
         if depth2img_pipe is None:
@@ -161,6 +162,7 @@ def generate_image():
             num_inference_steps=steps,
             guidance_scale=guidance_scale,
             strength=strength,
+            generator=generator,
         ).images[0]
 
     image_io = io.BytesIO()
