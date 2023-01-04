@@ -9,7 +9,8 @@ from diffusers import StableDiffusionDepth2ImgPipeline, EulerAncestralDiscreteSc
 import random
 import colorlog
 import sys
-from logging import PercentStyle
+import logging
+from logtail import LogtailHandler
 
 class ExtraFieldsFormatter(colorlog.ColoredFormatter):
     def __init__(self, *args, **kwargs):
@@ -36,7 +37,7 @@ class ExtraFieldsFormatter(colorlog.ColoredFormatter):
 
     def __set_format(self, fmt: str):
         self._fmt = fmt
-        self._style = PercentStyle(self._fmt)
+        self._style = logging.PercentStyle(self._fmt)
 
 class ExtraKeysResolver:
 
@@ -72,7 +73,11 @@ def create_logger(name):
     handler.setFormatter(ExtraFieldsFormatter('%(log_color)s%(message)s'))
 
     logger = colorlog.getLogger(name)
-    logger.setLevel(20) # info
+    logger.handlers = []
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
+
+    handler = LogtailHandler(source_token=os.environ["LOGTAIL_TOKEN"])
     logger.addHandler(handler)
 
     return logger

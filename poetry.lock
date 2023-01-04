@@ -203,12 +203,32 @@ MarkupSafe = ">=0.23"
 i18n = ["Babel (>=0.8)"]
 
 [[package]]
+name = "logtail-python"
+version = "0.1.3"
+description = "Logtail.com client library"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+msgpack = ">=0.5.6"
+requests = ">=2.18.4"
+
+[[package]]
 name = "markupsafe"
 version = "2.1.1"
 description = "Safely add untrusted strings to HTML/XML markup."
 category = "main"
 optional = false
 python-versions = ">=3.7"
+
+[[package]]
+name = "msgpack"
+version = "1.0.4"
+description = "MessagePack serializer"
+category = "main"
+optional = false
+python-versions = "*"
 
 [[package]]
 name = "numpy"
@@ -515,7 +535,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "flake8 (<5)", "pytest-co
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "489e891238f59a2bb76ba7afba7a318b837fd0bf9bf3f245448ddee2d68d7cfb"
+content-hash = "744323485314c8ffe1225f47e9d0fdfbd8f8c5b1c9650ba2a5db902783a0cf54"
 
 [metadata.files]
 accelerate = []
@@ -532,7 +552,9 @@ idna = []
 importlib-metadata = []
 itsdangerous = []
 jinja2 = []
+logtail-python = []
 markupsafe = []
+msgpack = []
 numpy = []
 nvidia-cublas-cu11 = []
 nvidia-cuda-nvrtc-cu11 = []
