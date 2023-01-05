@@ -1,7 +1,7 @@
 import base64
 import torch
 import uuid
-from flask import Flask, request, Response, send_file
+from flask import Flask, request, Response, send_file, make_response
 import io
 import os
 from PIL import Image
@@ -147,6 +147,7 @@ def generate_image():
     guidance_scale = params['guidance_scale'] if "guidance_scale" in params else 7
     strength = params['strength'] if "strength" in params else 0.75
     steps = params['steps'] if "steps" in params else 20
+    order = params['order'] if "order" in params else None
     
     logger.info(f'Params processed', extra={
         "request_id": request_id,
@@ -157,6 +158,7 @@ def generate_image():
         "guidance_scale": guidance_scale,
         "strength": strength,
         "steps": steps,
+        "order": order
     })
 
     generator = torch.Generator(device='cuda')
@@ -180,7 +182,13 @@ def generate_image():
     image.save(image_io, 'PNG')
     image_io.seek(0)
 
-    return send_file(image_io, mimetype='image/png')
+    response = make_response(send_file(image_io, mimetype='image/png'))
+    response.headers['X-Request-Id'] = request_id
+
+    if order is not None:
+        response.headers['X-Order'] = order
+
+    return response
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=4242)
