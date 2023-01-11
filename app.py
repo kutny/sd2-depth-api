@@ -10,7 +10,7 @@ import random
 import colorlog
 import sys
 import logging
-from logtail import LogtailHandler
+from logzio.handler import LogzioHandler
 
 class ExtraFieldsFormatter(colorlog.ColoredFormatter):
     def __init__(self, *args, **kwargs):
@@ -77,8 +77,14 @@ def create_logger(name):
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
 
-    handler = LogtailHandler(source_token=os.environ["LOGTAIL_TOKEN"])
-    logger.addHandler(handler)
+    app_env = os.environ["APP_ENV"]
+
+    logz_formatter = logging.Formatter('{"app_env": "' + app_env + '"}', validate=False)
+
+    logz_handler = LogzioHandler(os.environ["LOGZIO_TOKEN"], url="https://listener-eu.logz.io:8071")
+    logz_handler.setLevel(logging.INFO)
+    logz_handler.setFormatter(logz_formatter)
+    logger.addHandler(logz_handler)
 
     return logger
 
