@@ -11,6 +11,7 @@ import colorlog
 import sys
 import logging
 from logzio.handler import LogzioHandler
+import numpy as np
 
 class ExtraFieldsFormatter(colorlog.ColoredFormatter):
     def __init__(self, *args, **kwargs):
@@ -67,6 +68,14 @@ class ExtraKeysResolver:
     @staticmethod
     def get_extra_keys(record):
         return record.__dict__.keys() - ExtraKeysResolver.ignored_record_keys
+
+def image2depth_map(depth_image: Image):
+    depth = np.array(depth_image.convert("L"))
+    depth = depth.astype(np.float32) / 255.0
+    depth = depth[None, None]
+    depth = torch.from_numpy(depth)
+
+    return depth
 
 def create_logger(name):
     handler = colorlog.StreamHandler()
@@ -148,6 +157,7 @@ def generate_image():
 
     prompt = params['prompt']
 
+    depth_image = params['depth_image'] if "depth_image" in params else None
     seed = params['seed'] if "steps" in params else random.randint(1000, 9999)
     negative_prompt = params['negative_prompt'] if "negative_prompt" in params else None
     guidance_scale = params['guidance_scale'] if "guidance_scale" in params else 7
@@ -176,6 +186,7 @@ def generate_image():
 
         image = depth2img_pipe(
             prompt=prompt,
+            depth_map=image2depth_map(depth_image) if depth_image is None else None,
             image=base_image,
             negative_prompt=negative_prompt,
             num_inference_steps=steps,
