@@ -70,11 +70,10 @@ class ExtraKeysResolver:
         return record.__dict__.keys() - ExtraKeysResolver.ignored_record_keys
 
 def image2depth_map(depth_image: Image):
-    depth = np.array(depth_image.convert("L"))
-    depth = depth.astype(np.float32) / 255.0
-    depth = depth[None, None]
+    depth = depth_image.convert("L")
+    depth = np.expand_dims(depth, axis=0)
     depth = torch.from_numpy(depth)
-
+    depth = 2. * depth - 1.
     return depth
 
 def create_logger(name):
@@ -158,7 +157,7 @@ def generate_image():
 
     prompt = params['prompt']
 
-    depth_image = params['depth_image'] if "depth_image" in params else None
+    depth_image = load_image(params['depth_image']) if "depth_image" in params else None
     seed = params['seed'] if "steps" in params else random.randint(1000, 9999)
     negative_prompt = params['negative_prompt'] if "negative_prompt" in params else None
     guidance_scale = params['guidance_scale'] if "guidance_scale" in params else 7
@@ -179,6 +178,10 @@ def generate_image():
         "order": order
     })
 
+    if depth_image is not None:
+        depth_image_path = f"{base_images_dir}/{request_id}_depth.png"
+        depth_image.save(depth_image_path)
+
     generator = torch.Generator(device='cuda')
     generator.manual_seed(seed)
 
@@ -188,7 +191,7 @@ def generate_image():
 
         image = depth2img_pipe(
             prompt=prompt,
-            depth_map=image2depth_map(depth_image) if depth_image is None else None,
+            depth_map=image2depth_map(depth_image) if depth_image is not None else None,
             image=base_image,
             negative_prompt=negative_prompt,
             num_inference_steps=steps,
