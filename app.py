@@ -168,6 +168,7 @@ def generate_image():
     logger.info(f'Params processed', extra={
         "request_id": request_id,
         "base_image_path": base_image_save_path,
+        "depth_image_received": depth_image is not None,
         "prompt": prompt,
         "seed": seed,
         "negative_prompt": negative_prompt,
