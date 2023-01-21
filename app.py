@@ -107,7 +107,8 @@ model_path = sys.argv[1]
 
 base_images_dir = f"{os.getcwd()}/input_images"
 
-os.mkdir(base_images_dir)
+if not os.path.exists(base_images_dir):
+    os.mkdir(base_images_dir)
 
 app = Flask(__name__)
 
