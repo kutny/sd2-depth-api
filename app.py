@@ -221,9 +221,10 @@ def generate_image():
     depth_map_histogram_path = f"{inputs_dir}/{request_id}_depth_histogram.png"
     depth_map_normalized_image_path = f"{inputs_dir}/{request_id}_normalized_depth.png"
     depth_map_normalized_histogram_path = f"{inputs_dir}/{request_id}_normalized_depth_histogram.png"
-    depth_map, depth_map_normalized = get_depth_map(depth_map_url)
 
     download_depth_map(depth_map_url, depth_map_path)
+    depth_map, depth_map_normalized = get_depth_map(depth_map_path)
+    
     get_depth_map_img(depth_map).save(depth_map_image_path)
     save_histogram(depth_map, "orig depth map", depth_map_histogram_path)
     get_depth_map_img(depth_map_normalized).save(depth_map_normalized_image_path)
