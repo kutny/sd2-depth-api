@@ -1,8 +1,9 @@
 import torch
 from PIL import Image
-import numpy as np
 import cv2
+import numpy as np
 import matplotlib.pyplot as plt
+from sd2_depth_api.app import s3
 
 def download_depth_map(depth_map_url: str, depth_map_path: str):
     # example: https://s3.eu-west-1.amazonaws.com/interiorgen.dev/depth/b702ce1aa3dbe99ffa0e267d468b114e.npy
