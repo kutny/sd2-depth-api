@@ -187,7 +187,9 @@ def generate_image():
 
     base_image = load_image(params['base_image'])
 
-    base_image_save_path = f"{inputs_dir}/{request_id}.png"
+    request_dir = f"{inputs_dir}/{request_id}"
+
+    base_image_save_path = f"{request_dir}/1-base_image.png"
     base_image.save(base_image_save_path)
 
     if "prompt" not in params:
@@ -216,12 +218,11 @@ def generate_image():
         "order": order
     })
 
-    request_dir = f"{inputs_dir}/{request_id}"
-    depth_map_path = f"{request_dir}/depth_map.npy"
-    depth_map_image_path = f"{request_dir}/1-depth_map.png"
-    depth_map_histogram_path = f"{request_dir}/2-depth_map_histogram.png"
-    depth_map_normalized_image_path = f"{request_dir}/3-normalized_depth_map.png"
-    depth_map_normalized_histogram_path = f"{request_dir}/4-normalized_depth_map_histogram.png"
+    depth_map_path = f"{request_dir}/2-depth_map.npy"
+    depth_map_image_path = f"{request_dir}/3-depth_map.png"
+    depth_map_histogram_path = f"{request_dir}/4-depth_map_histogram.png"
+    depth_map_normalized_image_path = f"{request_dir}/5-normalized_depth_map.png"
+    depth_map_normalized_histogram_path = f"{request_dir}/6-normalized_depth_map_histogram.png"
 
     os.mkdir(request_dir)
 
