@@ -216,11 +216,14 @@ def generate_image():
         "order": order
     })
 
-    depth_map_path = f"{inputs_dir}/{request_id}_depth.npy"
-    depth_map_image_path = f"{inputs_dir}/{request_id}_depth.png"
-    depth_map_histogram_path = f"{inputs_dir}/{request_id}_depth_histogram.png"
-    depth_map_normalized_image_path = f"{inputs_dir}/{request_id}_normalized_depth.png"
-    depth_map_normalized_histogram_path = f"{inputs_dir}/{request_id}_normalized_depth_histogram.png"
+    request_dir = "{inputs_dir}/{request_id}"
+    depth_map_path = f"{request_dir}/depth_map.npy"
+    depth_map_image_path = f"{request_dir}/1-depth_map.png"
+    depth_map_histogram_path = f"{request_dir}/2-depth_map_histogram.png"
+    depth_map_normalized_image_path = f"{request_dir}/3-normalized_depth_map.png"
+    depth_map_normalized_histogram_path = f"{request_dir}/4-normalized_depth_map_histogram.png"
+
+    os.mkdir(request_dir)
 
     download_depth_map(depth_map_url, depth_map_path)
     depth_map, depth_map_normalized = get_depth_map(depth_map_path)
