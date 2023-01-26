@@ -59,23 +59,22 @@ class ExtraKeysResolver:
     def get_extra_keys(record):
         return record.__dict__.keys() - ExtraKeysResolver.ignored_record_keys
 
-    def create_logger(name):
-        handler = colorlog.StreamHandler()
-        handler.setFormatter(ExtraFieldsFormatter('%(log_color)s%(message)s'))
+def create_logger(name):
+    handler = colorlog.StreamHandler()
+    handler.setFormatter(ExtraFieldsFormatter('%(log_color)s%(message)s'))
 
-        logger = colorlog.getLogger(name)
-        logger.handlers = []
-        logger.setLevel(logging.INFO)
-        logger.addHandler(handler)
+    logger = colorlog.getLogger(name)
+    logger.handlers = []
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
 
-        app_env = os.environ["APP_ENV"]
+    app_env = os.environ["APP_ENV"]
 
-        logz_formatter = logging.Formatter('{"app_env": "' + app_env + '"}', validate=False)
+    logz_formatter = logging.Formatter('{"app_env": "' + app_env + '"}', validate=False)
 
-        logz_handler = LogzioHandler(os.environ["LOGZIO_TOKEN"], url="https://listener-eu.logz.io:8071")
-        logz_handler.setLevel(logging.INFO)
-        logz_handler.setFormatter(logz_formatter)
-        logger.addHandler(logz_handler)
+    logz_handler = LogzioHandler(os.environ["LOGZIO_TOKEN"], url="https://listener-eu.logz.io:8071")
+    logz_handler.setLevel(logging.INFO)
+    logz_handler.setFormatter(logz_formatter)
+    logger.addHandler(logz_handler)
 
-        return logger
-    
+    return logger
