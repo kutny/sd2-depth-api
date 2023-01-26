@@ -216,7 +216,7 @@ def generate_image():
         "order": order
     })
 
-    request_dir = "{inputs_dir}/{request_id}"
+    request_dir = f"{inputs_dir}/{request_id}"
     depth_map_path = f"{request_dir}/depth_map.npy"
     depth_map_image_path = f"{request_dir}/1-depth_map.png"
     depth_map_histogram_path = f"{request_dir}/2-depth_map_histogram.png"
