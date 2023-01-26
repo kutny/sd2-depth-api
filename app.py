@@ -188,6 +188,7 @@ def generate_image():
     base_image = load_image(params['base_image'])
 
     request_dir = f"{inputs_dir}/{request_id}"
+    os.mkdir(request_dir)
 
     base_image_save_path = f"{request_dir}/1-base_image.png"
     base_image.save(base_image_save_path)
@@ -223,8 +224,6 @@ def generate_image():
     depth_map_histogram_path = f"{request_dir}/4-depth_map_histogram.png"
     depth_map_normalized_image_path = f"{request_dir}/5-normalized_depth_map.png"
     depth_map_normalized_histogram_path = f"{request_dir}/6-normalized_depth_map_histogram.png"
-
-    os.mkdir(request_dir)
 
     download_depth_map(depth_map_url, depth_map_path)
     depth_map, depth_map_normalized = get_depth_map(depth_map_path)
