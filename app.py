@@ -12,6 +12,9 @@ import sys
 import logging
 from logzio.handler import LogzioHandler
 import numpy as np
+import cv2
+import matplotlib.pyplot as plt
+import boto3
 
 class ExtraFieldsFormatter(colorlog.ColoredFormatter):
     def __init__(self, *args, **kwargs):
@@ -69,12 +72,45 @@ class ExtraKeysResolver:
     def get_extra_keys(record):
         return record.__dict__.keys() - ExtraKeysResolver.ignored_record_keys
 
-def image2depth_map(depth_image: Image):
-    depth = depth_image.convert("L")
-    depth = np.expand_dims(depth, axis=0)
-    depth = torch.from_numpy(depth)
-    depth = 2. * depth - 1.
-    return depth
+def download_depth_map(depth_map_url: str, depth_map_path: str):
+    # example: https://s3.eu-west-1.amazonaws.com/interiorgen.dev/depth/b702ce1aa3dbe99ffa0e267d468b114e.npy
+    url_parts = depth_map_url.split("/")
+    key = "/".join(url_parts[-2:])
+    bucket_name = url_parts[3:][0]
+
+    s3.download_file(Bucket=bucket_name, Key=key, Filename=depth_map_path)
+
+def get_depth_map(depth_map_path: str):
+    depth_map = np.load(depth_map_path)
+    depth_map_normalized = np.log(depth_map)
+
+    return depth_map, depth_map_normalized
+
+def to_depthmap_tensor(init_depth: np.ndarray):
+    init_depth = np.expand_dims(init_depth, axis=0)
+    init_depth = torch.from_numpy(init_depth)
+    init_depth = 2. * init_depth - 1.
+
+    return init_depth
+
+def get_depth_map_img(depth_map: np.ndarray):
+    depth_min = depth_map.min()
+    depth_max = depth_map.max()
+    max_val = 255
+
+    out = (depth_map - depth_min) / (depth_max - depth_min)
+    # print("depth interval <" + str(out.min()) + "; " + str(out.max()) + ">") # <0; 1>
+    out = max_val * out
+    # print("depth interval <" + str(out.min()) + "; " + str(out.max()) + ">") # <0; 255>
+
+    img = cv2.applyColorMap(np.uint8(out), cv2.COLORMAP_INFERNO)
+    return Image.fromarray(img)
+
+def save_histogram(depth_map: np.ndarray, title: str, path: str):
+    a = np.concatenate(depth_map, axis=0)
+    plt.hist(a, bins="auto")
+    plt.title(title) 
+    plt.savefig(path)
 
 def create_logger(name):
     handler = colorlog.StreamHandler()
@@ -104,10 +140,12 @@ if len(sys.argv) != 2:
 
 model_path = sys.argv[1]
 
-base_images_dir = f"{os.getcwd()}/input_images"
+inputs_dir = f"{os.getcwd()}/inputs"
 
-if not os.path.exists(base_images_dir):
-    os.mkdir(base_images_dir)
+if not os.path.exists(inputs_dir):
+    os.mkdir(inputs_dir)
+
+s3 = boto3.client("s3")
 
 app = Flask(__name__)
 
@@ -149,7 +187,7 @@ def generate_image():
 
     base_image = load_image(params['base_image'])
 
-    base_image_save_path = f"{base_images_dir}/{request_id}.png"
+    base_image_save_path = f"{inputs_dir}/{request_id}.png"
     base_image.save(base_image_save_path)
 
     if "prompt" not in params:
@@ -157,18 +195,18 @@ def generate_image():
 
     prompt = params['prompt']
 
-    depth_image = load_image(params['depth_image']) if "depth_image" in params else None
+    depth_map_url = params['depth_map_url']
     seed = params['seed'] if "steps" in params else random.randint(1000, 9999)
     negative_prompt = params['negative_prompt'] if "negative_prompt" in params else None
     guidance_scale = params['guidance_scale'] if "guidance_scale" in params else 7
     strength = params['strength'] if "strength" in params else 0.75
     steps = params['steps'] if "steps" in params else 20
     order = params['order'] if "order" in params else None
-    
+
     logger.info(f'Params processed', extra={
         "request_id": request_id,
         "base_image_path": base_image_save_path,
-        "depth_image_received": depth_image is not None,
+        "depth_map_url": depth_map_url,
         "prompt": prompt,
         "seed": seed,
         "negative_prompt": negative_prompt,
@@ -178,9 +216,18 @@ def generate_image():
         "order": order
     })
 
-    if depth_image is not None:
-        depth_image_path = f"{base_images_dir}/{request_id}_depth.png"
-        depth_image.save(depth_image_path)
+    depth_map_path = f"{inputs_dir}/{request_id}_depth.npy"
+    depth_map_image_path = f"{inputs_dir}/{request_id}_depth.png"
+    depth_map_histogram_path = f"{inputs_dir}/{request_id}_depth_histogram.png"
+    depth_map_normalized_image_path = f"{inputs_dir}/{request_id}_normalized_depth.png"
+    depth_map_normalized_histogram_path = f"{inputs_dir}/{request_id}_normalized_depth_histogram.png"
+    depth_map, depth_map_normalized = get_depth_map(depth_map_url)
+
+    download_depth_map(depth_map_url, depth_map_path)
+    get_depth_map_img(depth_map).save(depth_map_image_path)
+    save_histogram(depth_map, "orig depth map", depth_map_histogram_path)
+    get_depth_map_img(depth_map_normalized).save(depth_map_normalized_image_path)
+    save_histogram(depth_map_normalized, "normalized depth map", depth_map_normalized_histogram_path)
 
     generator = torch.Generator(device='cuda')
     generator.manual_seed(seed)
@@ -191,7 +238,7 @@ def generate_image():
 
         image = depth2img_pipe(
             prompt=prompt,
-            depth_map=image2depth_map(depth_image) if depth_image is not None else None,
+            depth_map=to_depthmap_tensor(depth_map_normalized),
             image=base_image,
             negative_prompt=negative_prompt,
             num_inference_steps=steps,
