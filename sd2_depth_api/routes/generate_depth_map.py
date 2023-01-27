@@ -1,10 +1,11 @@
 from __main__ import app
+import os
 import torch
 import uuid
 from flask import request, Response
 from sd2_depth_api.midas import read_image, infer_depth
 from sd2_depth_api.app import logger
-from sd2_depth_api.image import decode_image
+from sd2_depth_api.image import load_image
 from sd2_depth_api.depth_map import upload_depth_map
 from midas.model_loader import default_models, load_model
 
@@ -16,6 +17,11 @@ torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
 
 model_path = "/content/MiDaS/weights/dpt_beit_large_512.pt"
+
+inputs_dir = f"{os.getcwd()}/depth_generation_inputs"
+
+if not os.path.exists(inputs_dir):
+    os.mkdir(inputs_dir)
 
 logger.info("Loading MiDaS model")
 
@@ -41,7 +47,12 @@ def generate_depth_map():
 
     depth_map_url = params['depth_map_url']
 
-    original_image_rgb = read_image(decode_image(params['base_image']))  # in [0, 1]
+    base_image_path = f"{inputs_dir}/{request_id}.png"
+
+    base_image = load_image(params['base_image'])
+    base_image.save(base_image_path)
+
+    original_image_rgb = read_image(base_image_path)  # in [0, 1]
     image = transform({"image": original_image_rgb})["image"]
 
     with torch.no_grad():

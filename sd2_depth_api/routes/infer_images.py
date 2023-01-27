@@ -13,7 +13,7 @@ from sd2_depth_api.depth_map import download_depth_map, get_depth_map, get_depth
 
 model_path = sys.argv[1]
 
-inputs_dir = f"{os.getcwd()}/inputs"
+inputs_dir = f"{os.getcwd()}/inference_inputs"
 
 if not os.path.exists(inputs_dir):
     os.mkdir(inputs_dir)
