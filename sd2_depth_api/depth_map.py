@@ -2,14 +2,22 @@ import torch
 from PIL import Image
 import cv2
 import numpy as np
+import io
 import matplotlib.pyplot as plt
+from sd2_depth_api.s3 import parse_s3_url
 from sd2_depth_api.app import s3
 
+def upload_depth_map(depth_map_url: str, depth_map: np.ndarray):
+    bucket_name, key = parse_s3_url(depth_map_url)
+
+    depth_map_io = io.BytesIO()
+    np.save(depth_map_io, depth_map)
+    depth_map_io.seek(0)
+
+    s3.upload_fileobj(depth_map_io, bucket_name, key)
+
 def download_depth_map(depth_map_url: str, depth_map_path: str):
-    # example: https://s3.eu-west-1.amazonaws.com/interiorgen.dev/depth/b702ce1aa3dbe99ffa0e267d468b114e.npy
-    url_parts = depth_map_url.split("/")
-    key = "/".join(url_parts[-2:])
-    bucket_name = url_parts[3:][0]
+    bucket_name, key = parse_s3_url(depth_map_url)
 
     s3.download_file(Bucket=bucket_name, Key=key, Filename=depth_map_path)
 
