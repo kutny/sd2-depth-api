@@ -10,8 +10,10 @@ from sd2_depth_api.app import logger
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
 
-if len(sys.argv) != 3:
-    logger.error("Usage: main.py [artifacts base path] [SD depth model dir] [MiDaS model path]")
+argument_labels = ["[artifacts base path]", "[SD depth model dir]", "[MiDaS model path]"]
+
+if len(sys.argv) != (len(argument_labels) + 1):
+    logger.error("Usage: main.py " + ("  ".join(argument_labels)))
     sys.exit(1)
 
 app = Flask(__name__)
