@@ -10,10 +10,6 @@ from sd2_depth_api.image import load_image
 from sd2_depth_api.depth_map import upload_depth_map
 from midas.model_loader import default_models, load_model
 
-# set torch options
-torch.backends.cudnn.enabled = True
-torch.backends.cudnn.benchmark = True
-
 midas_model_path = sys.argv[2]
 
 model_type = midas_model_path.split("/")[-1:][0][:-3]
