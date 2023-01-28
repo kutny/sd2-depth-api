@@ -8,19 +8,18 @@ from sd2_depth_api.midas import read_image, infer_depth
 from sd2_depth_api.app import logger
 from sd2_depth_api.image import load_image
 from sd2_depth_api.depth_map import upload_depth_map
-from midas.model_loader import default_models, load_model
+from midas.model_loader import load_model
 
 midas_model_path = sys.argv[2]
 
 model_type = midas_model_path.split("/")[-1:][0][:-3]
-model_weights = default_models[model_type]
 
 inputs_dir = f"{os.getcwd()}/depth_generation_inputs"
 
 if not os.path.exists(inputs_dir):
     os.mkdir(inputs_dir)
 
-logger.info("Loading MiDaS model")
+logger.info(f"Loading MiDaS model: {model_type}")
 
 device = torch.device("cuda")
 
