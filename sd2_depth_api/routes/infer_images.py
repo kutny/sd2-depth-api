@@ -6,14 +6,14 @@ from flask import request, Response, send_file, make_response
 import io
 import os
 import random
-from sd2_depth_api.app import logger
+from sd2_depth_api.app import logger, artifacts_base_dir
 from sd2_depth_api.deph_model import create_model_pipe
 from sd2_depth_api.image import load_image
 from sd2_depth_api.depth_map import download_depth_map, get_depth_map, get_depth_map_img, save_histogram, to_depthmap_tensor
 
-sd_depth_model_path = sys.argv[1]
+sd_depth_model_path = sys.argv[2]
 
-inputs_dir = f"{os.getcwd()}/inference_inputs"
+inputs_dir = f"{artifacts_base_dir}/inference_inputs"
 
 if not os.path.exists(inputs_dir):
     os.mkdir(inputs_dir)
@@ -110,6 +110,11 @@ def generate_image():
 
     response = make_response(send_file(image_io, mimetype='image/png'))
     response.headers['X-Request-Id'] = request_id
+    response.headers['X-Depth-Map-Path'] = depth_map_path
+    response.headers['X-Depth-Map-Image-Path'] = depth_map_image_path
+    response.headers['X-Depth-Map-Histogram-Path'] = depth_map_histogram_path
+    response.headers['X-Depth-Map-Normalized-Image-Path'] = depth_map_normalized_image_path
+    response.headers['X-Depth-Map-Normalized-Histogram-Path'] = depth_map_normalized_histogram_path
 
     if order is not None:
         response.headers['X-Order'] = order

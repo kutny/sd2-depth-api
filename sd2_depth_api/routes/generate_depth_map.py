@@ -5,16 +5,16 @@ import torch
 import uuid
 from flask import request, Response
 from sd2_depth_api.midas import read_image, infer_depth
-from sd2_depth_api.app import logger
+from sd2_depth_api.app import logger, artifacts_base_dir
 from sd2_depth_api.image import load_image
 from sd2_depth_api.depth_map import upload_depth_map
 from midas.model_loader import load_model
 
-midas_model_path = sys.argv[2]
+midas_model_path = sys.argv[3]
 
 model_type = midas_model_path.split("/")[-1:][0][:-3]
 
-inputs_dir = f"{os.getcwd()}/depth_generation_inputs"
+inputs_dir = f"{artifacts_base_dir}/depth_generation_inputs"
 
 if not os.path.exists(inputs_dir):
     os.mkdir(inputs_dir)

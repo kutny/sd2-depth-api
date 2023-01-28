@@ -11,7 +11,7 @@ torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
 
 if len(sys.argv) != 3:
-    logger.error("Usage: main.py [SD depth model dir] [MiDaS model path]")
+    logger.error("Usage: main.py [artifacts base path] [SD depth model dir] [MiDaS model path]")
     sys.exit(1)
 
 app = Flask(__name__)
