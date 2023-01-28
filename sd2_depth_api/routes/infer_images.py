@@ -76,9 +76,9 @@ def generate_image():
 
     depth_map_path = f"{request_dir}/2-depth_map.npy"
     depth_map_image_path = f"{request_dir}/3-depth_map.png"
-    depth_map_histogram_path = f"{request_dir}/4-depth_map_histogram.png"
+    depth_map_histogram_path = f"{request_dir}/4-depth_map_histogram.pdf"
     depth_map_normalized_image_path = f"{request_dir}/5-normalized_depth_map.png"
-    depth_map_normalized_histogram_path = f"{request_dir}/6-normalized_depth_map_histogram.png"
+    depth_map_normalized_histogram_path = f"{request_dir}/6-normalized_depth_map_histogram.pdf"
 
     download_depth_map(depth_map_url, depth_map_path)
     depth_map, depth_map_normalized = get_depth_map(depth_map_path, normalization_expression)
