@@ -1,4 +1,5 @@
 from __main__ import app
+import sys
 import os
 import torch
 import uuid
@@ -9,14 +10,14 @@ from sd2_depth_api.image import load_image
 from sd2_depth_api.depth_map import upload_depth_map
 from midas.model_loader import default_models, load_model
 
-model_type = "dpt_beit_large_512"
-model_weights = default_models[model_type]
-
 # set torch options
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
 
-model_path = "/content/MiDaS/weights/dpt_beit_large_512.pt"
+midas_model_path = sys.argv[2]
+
+model_type = midas_model_path.split("/")[-1:][0][:-3]
+model_weights = default_models[model_type]
 
 inputs_dir = f"{os.getcwd()}/depth_generation_inputs"
 
@@ -27,7 +28,7 @@ logger.info("Loading MiDaS model")
 
 device = torch.device("cuda")
 
-model, transform, net_w, net_h = load_model(device, model_path, model_type, optimize=False, height=None, square=False)
+model, transform, net_w, net_h = load_model(device, midas_model_path, model_type, optimize=False, height=None, square=False)
 
 @app.route('/generate-depth-map', methods=['POST'])
 def generate_depth_map():

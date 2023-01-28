@@ -11,16 +11,16 @@ from sd2_depth_api.deph_model import create_model_pipe
 from sd2_depth_api.image import load_image
 from sd2_depth_api.depth_map import download_depth_map, get_depth_map, get_depth_map_img, save_histogram, to_depthmap_tensor
 
-model_path = sys.argv[1]
+sd_depth_model_path = sys.argv[1]
 
 inputs_dir = f"{os.getcwd()}/inference_inputs"
 
 if not os.path.exists(inputs_dir):
     os.mkdir(inputs_dir)
 
-logger.info(f"Loading model {model_path}")
+logger.info(f"Loading SD depth model from {sd_depth_model_path}")
 
-depth2img_pipe = create_model_pipe(model_path)
+depth2img_pipe = create_model_pipe(sd_depth_model_path)
 
 @app.route('/infer-images', methods=['POST'])
 def generate_image():

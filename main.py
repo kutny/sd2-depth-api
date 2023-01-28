@@ -5,8 +5,8 @@ from flask import Flask
 import os
 from sd2_depth_api.app import logger
 
-if len(sys.argv) != 2:
-    logger.error("Missing model path argument")
+if len(sys.argv) != 3:
+    logger.error("Usage: main.py [SD depth model dir] [MiDaS model path]")
     sys.exit(1)
 
 app = Flask(__name__)
