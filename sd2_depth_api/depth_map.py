@@ -21,9 +21,9 @@ def download_depth_map(depth_map_url: str, depth_map_path: str):
 
     s3.download_file(Bucket=bucket_name, Key=key, Filename=depth_map_path)
 
-def get_depth_map(depth_map_path: str):
+def get_depth_map(depth_map_path: str, normalization_expression: str):
     depth_map = np.load(depth_map_path)
-    depth_map_normalized = np.log(depth_map)
+    depth_map_normalized = eval(normalization_expression) # "np.log(depth_map)"
 
     return depth_map, depth_map_normalized
 

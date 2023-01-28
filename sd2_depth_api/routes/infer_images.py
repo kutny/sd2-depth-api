@@ -58,6 +58,7 @@ def generate_image():
     strength = params['strength'] if "strength" in params else 0.75
     steps = params['steps'] if "steps" in params else 20
     order = params['order'] if "order" in params else None
+    normalization_expression = params['normalization_expression'] if "normalization_expression" in params else "np.log(depth_map)"
 
     logger.info(f'Params processed', extra={
         "request_id": request_id,
@@ -69,7 +70,8 @@ def generate_image():
         "guidance_scale": guidance_scale,
         "strength": strength,
         "steps": steps,
-        "order": order
+        "order": order,
+        "normalization_expression": normalization_expression,
     })
 
     depth_map_path = f"{request_dir}/2-depth_map.npy"
@@ -79,7 +81,7 @@ def generate_image():
     depth_map_normalized_histogram_path = f"{request_dir}/6-normalized_depth_map_histogram.png"
 
     download_depth_map(depth_map_url, depth_map_path)
-    depth_map, depth_map_normalized = get_depth_map(depth_map_path)
+    depth_map, depth_map_normalized = get_depth_map(depth_map_path, normalization_expression)
     
     get_depth_map_img(depth_map).save(depth_map_image_path)
     save_histogram(depth_map, "orig depth map", depth_map_histogram_path)
