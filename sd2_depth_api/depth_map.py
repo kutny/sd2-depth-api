@@ -6,6 +6,7 @@ import io
 import matplotlib.pyplot as plt
 from sd2_depth_api.s3 import parse_s3_url
 from sd2_depth_api.app import s3
+import math
 
 def upload_depth_map(depth_map_url: str, depth_map: np.ndarray):
     bucket_name, key = parse_s3_url(depth_map_url)
