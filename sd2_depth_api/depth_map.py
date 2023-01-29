@@ -8,6 +8,14 @@ from sd2_depth_api.s3 import parse_s3_url
 from sd2_depth_api.app import s3
 import math
 
+def normalize_to_0_255(depth_map: np.ndarray):
+    depth_min = depth_map.min()
+    depth_max = depth_map.max()
+    max_val = 255
+
+    out = (depth_map - depth_min) / (depth_max - depth_min)  # <0; 1>
+    return max_val * out  # <0; 255>
+
 def upload_depth_map(depth_map_url: str, depth_map: np.ndarray):
     bucket_name, key = parse_s3_url(depth_map_url)
 
@@ -36,16 +44,7 @@ def to_depthmap_tensor(init_depth: np.ndarray):
     return init_depth
 
 def get_depth_map_img(depth_map: np.ndarray):
-    depth_min = depth_map.min()
-    depth_max = depth_map.max()
-    max_val = 255
-
-    out = (depth_map - depth_min) / (depth_max - depth_min)
-    # print("depth interval <" + str(out.min()) + "; " + str(out.max()) + ">") # <0; 1>
-    out = max_val * out
-    # print("depth interval <" + str(out.min()) + "; " + str(out.max()) + ">") # <0; 255>
-
-    img = cv2.applyColorMap(np.uint8(out), cv2.COLORMAP_INFERNO)
+    img = cv2.applyColorMap(np.uint8(normalize_to_0_255(depth_map)), cv2.COLORMAP_INFERNO)
     return Image.fromarray(img)
 
 def save_histogram(depth_map: np.ndarray, title: str, path: str):
