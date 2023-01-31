@@ -9,7 +9,7 @@ import random
 from sd2_depth_api.app import logger, artifacts_base_dir
 from sd2_depth_api.deph_model import create_model_pipe
 from sd2_depth_api.image import load_image
-from sd2_depth_api.depth_map import download_depth_map, get_depth_map, get_depth_map_img, save_histogram, to_depthmap_tensor
+from sd2_depth_api.routes.depth_processor import prepare_depth_map_tensor
 
 sd_depth_model_path = sys.argv[2]
 
@@ -51,7 +51,7 @@ def generate_image():
 
     prompt = params['prompt']
 
-    depth_map_url = params['depth_map_url']
+    depth_map_url = params['depth_map_url'] if 'depth_map_url' in params else None
     seed = params['seed'] if "steps" in params else random.randint(1000, 9999)
     negative_prompt = params['negative_prompt'] if "negative_prompt" in params else None
     guidance_scale = params['guidance_scale'] if "guidance_scale" in params else 7
@@ -74,19 +74,10 @@ def generate_image():
         "normalization_expression": normalization_expression,
     })
 
-    depth_map_path = f"{request_dir}/2-depth_map.npy"
-    depth_map_image_path = f"{request_dir}/3-depth_map.png"
-    depth_map_histogram_path = f"{request_dir}/4-depth_map_histogram.pdf"
-    depth_map_normalized_image_path = f"{request_dir}/5-normalized_depth_map.png"
-    depth_map_normalized_histogram_path = f"{request_dir}/6-normalized_depth_map_histogram.pdf"
+    depth_map_tensor = None
 
-    download_depth_map(depth_map_url, depth_map_path)
-    depth_map, depth_map_normalized = get_depth_map(depth_map_path, normalization_expression)
-    
-    get_depth_map_img(depth_map).save(depth_map_image_path)
-    save_histogram(depth_map, "orig depth map", depth_map_histogram_path)
-    get_depth_map_img(depth_map_normalized).save(depth_map_normalized_image_path)
-    save_histogram(depth_map_normalized, "normalized depth map", depth_map_normalized_histogram_path)
+    if depth_map_url:
+        depth_map_tensor = prepare_depth_map_tensor(depth_map_url, request_dir, normalization_expression)
 
     generator = torch.Generator(device='cuda')
     generator.manual_seed(seed)
@@ -97,7 +88,7 @@ def generate_image():
 
         image = depth2img_pipe(
             prompt=prompt,
-            depth_map=to_depthmap_tensor(depth_map_normalized),
+            depth_map=depth_map_tensor,
             image=base_image,
             negative_prompt=negative_prompt,
             num_inference_steps=steps,
@@ -112,11 +103,6 @@ def generate_image():
 
     response = make_response(send_file(image_io, mimetype='image/png'))
     response.headers['X-Request-Id'] = request_id
-    response.headers['X-Depth-Map-Path'] = depth_map_path
-    response.headers['X-Depth-Map-Image-Path'] = depth_map_image_path
-    response.headers['X-Depth-Map-Histogram-Path'] = depth_map_histogram_path
-    response.headers['X-Depth-Map-Normalized-Image-Path'] = depth_map_normalized_image_path
-    response.headers['X-Depth-Map-Normalized-Histogram-Path'] = depth_map_normalized_histogram_path
 
     if order is not None:
         response.headers['X-Order'] = order
